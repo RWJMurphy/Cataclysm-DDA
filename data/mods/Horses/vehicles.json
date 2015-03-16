@@ -1,0 +1,442 @@
+[
+  {
+    "type" : "vehicle",
+    "id" : "saddled_horse",
+    "name" : "Saddled Horse",
+    "blueprint" : "C#Q",
+    "parts" : [
+        {"x": 0, "y": 0, "part": "horse_midquarters"},
+        {"x": 0, "y": 0, "part": "horse_stomach"},
+        {"x": 0, "y": 0, "part": "horse_saddle"},
+        {"x": 0, "y": 0, "part": "horse_reins"},
+
+        {"x": 1, "y": 0, "part": "horse_forelegs"},
+        {"x": 1, "y": 0, "part": "horse_forefeet"},
+
+        {"x": -1, "y": 0, "part": "horse_hindlegs"},
+        {"x": -1, "y": 0, "part": "horse_hindfeet"}
+    ]
+  },
+
+  {
+    "type" : "vehicle",
+    "id" : "pony",
+    "name" : "Pony",
+    "blueprint" : "#",
+    "parts" : [
+        {"x": 0, "y": 0, "part": "horse_pony"},
+        {"x": 0, "y": 0, "part": "horse_stomach"},
+        {"x": 0, "y": 0, "part": "horse_saddle"},
+        {"x": 0, "y": 0, "part": "horse_reins"},
+        {"x": 0, "y": 0, "part": "horse_ponyfeet"}
+    ]
+  },
+
+  {
+    "type" : "vehicle_part",
+    "id" : "horse_saddle",
+    "name" : "horse saddle",
+    "symbol" : "#",
+    "color" : "brown",
+    "broken_symbol" : "*",
+    "broken_color" : "brown",
+    "damage_modifier" : 20,
+    "durability" : 30,
+    "item" : "horse_saddle",
+    "difficulty" : 1,
+    "flags" : [
+        "SEAT", "BOARDABLE"
+    ],
+    "breaks_into" : [
+        {"item": "leather", "min": 2, "max": 8},
+        {"item": "scrap", "min": 1, "max": 2},
+        {"item": "splinter", "min": 2, "max": 4}
+    ]
+  },
+  {
+    "type" : "vehicle_part",
+    "id" : "horse_reins",
+    "name" : "reins",
+    "symbol" : "H",
+    "color" : "brown",
+    "broken_symbol" : ";",
+    "broken_color" : "brown",
+    "damage_modifier" : 1,
+    "durability" : 20,
+    "item" : "horse_reins",
+    "difficulty" : 1,
+    "flags" : [
+        "CONTROLS"
+    ],
+    "breaks_into" : [
+        {"item": "leather", "min": 0, "max": 3}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_forelegs",
+    "name": "forelegs",
+    "symbol": "C",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 300,
+    "durability": 100,
+    "power" : 4,
+    "fuel_type" : "horse_feed",
+    "item": "horse_legs",
+    "difficulty": 1,
+    "location": "structure",
+    "flags": [
+      "ENGINE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 10, "max": 20}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_forefeet",
+    "name": "forefeet",
+    "symbol": "C",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 300,
+    "durability": 50,
+    "wheel_width": 8,
+
+    "item": "horse_feet",
+    "difficulty": 1,
+    "location": "under",
+    "flags": [
+      "WHEEL", "STABLE", "VARIABLE_SIZE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 4, "max": 8}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_hindfeet",
+    "name": "hindfeet",
+    "symbol": "Q",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 100,
+    "durability": 100,
+    "wheel_width": 8,
+
+    "item": "horse_feet",
+    "difficulty": 1,
+    "location": "under",
+    "flags": [
+      "WHEEL", "VARIABLE_SIZE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 1, "max": 2}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_hindlegs",
+    "name": "hindlegs",
+    "symbol": "Q",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 100,
+    "durability": 100,
+    "power" : 40,
+    "fuel_type": "horse_feed",
+
+    "item": "horse_legs",
+    "difficulty": 1,
+    "location": "structure",
+    "flags": [
+      "ENGINE", "BOARDABLE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 10, "max": 20}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_pony",
+    "name": "pony",
+    "symbol": "#",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 100,
+    "durability": 100,
+    "power" : 10,
+    "fuel_type": "horse_feed",
+    "item": "horse_pony",
+    "difficulty": 1,
+    "location": "structure",
+    "flags": [
+      "ENGINE", "BOARDABLE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 10, "max": 20}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_ponyfeet",
+    "name": "feet",
+    "symbol": "#",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 100,
+    "durability": 20,
+    "wheel_width": 16,
+
+    "item": "horse_feet",
+    "difficulty": 1,
+    "location": "under",
+    "flags": [
+      "STABLE", "WHEEL", "VARIABLE_SIZE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 1, "max": 4}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_midquarters",
+    "name": "midquarters",
+    "symbol": "H",
+    "color": "brown",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 30,
+    "durability": 100,
+    "size" : 100,
+    "item": "horse_midquarters",
+    "difficulty": 1,
+    "location": "structure",
+    "flags": [
+      "BOARDABLE"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 10, "max": 20}
+    ]
+  },
+  {
+    "type": "vehicle_part",
+    "id": "horse_stomach",
+    "name": "stomach",
+    "symbol": "q",
+    "color": "pink",
+    "broken_symbol": "%",
+    "broken_color": "red",
+    "damage_modifier": 30,
+    "durability": 5,
+    "size" : 10,
+    "fuel_type" : "horse_feed",
+    "item": "horse_stomach",
+    "difficulty": 1,
+    "location": "fuel_source",
+    "flags": [
+      "FUEL_TANK"
+    ],
+    "breaks_into": [
+      {"item": "meat", "min": 1, "max": 2}
+    ]
+  },
+
+  {
+    "type":"GENERIC",
+    "id" : "horse_pony",
+    "name" : "pony",
+    "name_plural" : "ponies",
+    "description" : "A shetland pony.",
+    "weight" : 150000,
+    "to_hit" : -20,
+    "color" : "red",
+    "symbol" : "%",
+    "material" : ["flesh", "bone"],
+    "volume" : 825,
+    "bashing" : 20,
+    "cutting" : 0,
+    "category" : "CC_OTHER",
+    "subcategory": "CSC_OTHER_OTHER",
+    "price" : 0
+  },
+  {
+    "type":"GENERIC",
+    "id" : "horse_legs",
+    "name" : "horse legs",
+    "description" : "Two legs of a horse. Why in god's name did you do this.",
+    "weight" : 100000,
+    "to_hit" : -20,
+    "color" : "red",
+    "symbol" : "%",
+    "material" : ["flesh"],
+    "volume" : 825,
+    "bashing" : 20,
+    "cutting" : 0,
+    "category" : "CC_OTHER",
+    "subcategory": "CSC_OTHER_OTHER",
+    "price" : 0
+  },
+  {
+    "type": "VAR_VEH_PART",
+    "id" : "horse_feet",
+    "name" : "horse feet",
+    "description" : "Two horse's feet. It will never run again. You monster.",
+    "color" : "red",
+    "symbol" : "%",
+
+    "material" : ["flesh", "bone"],
+    "weight" : 2000,
+    "volume" : 6,
+    "min-bigness": 3,
+    "max-bigness": 8,
+    "bigness-aspect": "WHEEL_DIAMETER",
+
+    "to_hit" : 0,
+
+    "bashing" : 4,
+    "cutting" : 0,
+    "category" : "CC_OTHER",
+    "subcategory": "CSC_OTHER_OTHER",
+    "price" : 0
+  },
+  {
+    "type":"GENERIC",
+    "id" : "horse_stomach",
+    "name" : "horse stomach",
+    "description" : "Horse stomach. Nutririous but disgusting.",
+    "volume" : 8,
+    "weight" : 5000,
+    "contains": 50,
+    "watertight": true,
+    "to_hit" : -2,
+    "color" : "white",
+    "symbol" : "q",
+    "material" : ["flesh"],
+    "bashing" : 1,
+    "cutting" : 0,
+    "category" : "CC_OTHER",
+    "subcategory": "CSC_OTHER_OTHER",
+    "price" : 0
+  },
+  {
+    "type":"GENERIC",
+    "id" : "horse_midquarters",
+    "name" : "horse midquarters",
+    "description" : "The middle third of a horse. My god.",
+    "weight" : 100000,
+    "to_hit" : -20,
+    "color" : "red",
+    "symbol" : "o",
+    "material" : ["flesh"],
+    "volume" : 825,
+    "bashing" : 20,
+    "cutting" : 0,
+    "category" : "CC_OTHER",
+    "subcategory": "CSC_OTHER_OTHER",
+    "price" : 0
+  },
+  {
+    "type":"GENERIC",
+    "id" : "horse_saddle",
+    "name" : "horse saddle",
+    "description" : "Hooooooorrrrsssssse saddle.",
+    "weight" : 5000,
+    "to_hit" : -4,
+    "color" : "brown",
+    "symbol" : "0",
+    "material" : ["leather", "wood"],
+    "volume" : 50,
+    "bashing" : 10,
+    "cutting" : 0,
+    "category" : "veh_parts",
+    "price" : 60000
+  },
+  {
+    "type":"GENERIC",
+    "id" : "horse_reins",
+    "name" : "horse reins",
+    "description" : "Reins.",
+    "weight" : 5000,
+    "to_hit" : -1,
+    "color" : "brown",
+    "symbol" : "0",
+    "material" : ["leather"],
+    "volume" : 2,
+    "bashing" : 1,
+    "cutting" : 0,
+    "category" : "veh_parts",
+    "price" : 5000
+  },
+
+  {
+    "type" : "ammunition_type",
+    "id" : "horse_feed",
+    "name" : "horse feed",
+    "default" : "horse_feed"
+  },
+
+  {
+    "type" : "AMMO",
+    "category" : "other",
+    "name": "horse feed",
+    "id" : "horse_feed",
+    "symbol" : "#",
+    "color" : "yellow",
+    "description" : "Horse food. Food for horses. Horses: they eat this. What do horses eat?",
+    "price" : 100,
+    "material" : "veggy",
+    "volume" : 1,
+    "weight" : 100,
+    "phase" : "solid",
+    "bashing" : 0,
+    "cutting" : 0,
+    "to_hit" : -5,
+    "ammo_type" : "horse_feed",
+    "casing" : "NULL",
+    "damage" : 5,
+    "pierce" : 5,
+    "range" : 4,
+    "dispersion" : 0,
+    "recoil" : 0,
+    "count" : 10,
+    "effects" : ["NEVER_MISFIRES", "CHEW"]
+  },
+
+  {
+    "type" : "recipe",
+    "result": "horse_feed",
+    "category": "CC_FOOD",
+    "subcategory": "CSC_FOOD_OTHER",
+    "skill_used": "cooking",
+    "skills_required": [ "survival", 0 ],
+    "difficulty": 0,
+    "time": 5000,
+    "reversible": false,
+    "autolearn": true,
+    "batch_time_factors": [75, 4],
+    "qualities" : [
+
+    ],
+    "tools": [
+
+    ],
+    "components": [
+      [
+        [ "straw_pile", 1 ]
+      ],
+      [
+        [ "water", 1 ],
+        [ "water_clean", 1 ]
+      ]
+    ]
+  }
+
+]
