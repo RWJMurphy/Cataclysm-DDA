@@ -1529,13 +1529,12 @@ void game::set_driving_view_offset(const point &p)
 
 void game::rustCheck()
 {
-    for (std::vector<const Skill*>::iterator aSkill = ++Skill::skills.begin();
-         aSkill != Skill::skills.end(); ++aSkill) {
+    for (auto const &aSkill : Skill::skills) {
         if (u.rust_rate() <= rng(0, 1000)) {
             continue;
         }
 
-        if ((*aSkill)->is_combat_skill() &&
+        if (aSkill.is_combat_skill() &&
             ((u.has_trait("PRED2") && one_in(4)) ||
              (u.has_trait("PRED3") && one_in(2)) ||
              (u.has_trait("PRED4") && x_in_y(2, 3)))) {
@@ -1557,15 +1556,15 @@ void game::rustCheck()
         }
 
         bool charged_bio_mem = u.has_active_bionic("bio_memory") && u.power_level > 25;
-        int oldSkillLevel = u.skillLevel(*aSkill);
+        int oldSkillLevel = u.skillLevel(aSkill);
 
-        if (u.skillLevel(*aSkill).rust(charged_bio_mem)) {
-            u.power_level -= 25;
+        if (u.skillLevel(aSkill).rust(charged_bio_mem)) {
+            u.charge_power(-25);
         }
-        int newSkill = u.skillLevel(*aSkill);
+        int newSkill = u.skillLevel(aSkill);
         if (newSkill < oldSkillLevel) {
             add_msg(m_bad, _("Your skill in %s has reduced to %d!"),
-                    (*aSkill)->name().c_str(), newSkill);
+                    aSkill.name().c_str(), newSkill);
         }
     }
 }
@@ -5678,7 +5677,7 @@ int game::mon_info(WINDOW *w)
                             new_seen_mon.push_back( news );
                         } else {
                             debugmsg( "%s at (%d,%d,%d) was not found in the tracker",
-                                      critter.disp_name().c_str(), 
+                                      critter.disp_name().c_str(),
                                       critter.posx(), critter.posy(), critter.posz() );
                         }
                     }
@@ -5976,7 +5975,7 @@ void game::monmove()
         if (!critter.is_dead()) {
             if (u.has_active_bionic("bio_alarm") && u.power_level >= 25 &&
                 rl_dist( u.pos(), critter.pos() ) <= 5) {
-                u.power_level -= 25;
+                u.charge_power(-25);
                 add_msg(m_warning, _("Your motion alarm goes off!"));
                 cancel_activity_query(_("Your motion alarm goes off!"));
                 if (u.in_sleep_state()) {
@@ -6173,6 +6172,8 @@ void game::flashbang(int x, int y, bool player_immune)
                 flash_mod = 8; // Just retract those and extrude fresh eyes
             } else if (u.has_bionic("bio_sunglasses") || u.is_wearing("rm13_armor_on")) {
                 flash_mod = 6;
+            } else if (u.worn_with_flag("BLIND") || u.is_wearing("goggles_welding")) {
+                flash_mod = 3; // Not really proper flash protection, but better than nothing
             }
             u.add_env_effect("blind", bp_eyes, (12 - flash_mod - dist) / 2, 10 - dist);
         }
@@ -6737,7 +6738,7 @@ void game::emp_blast(int x, int y)
         if (u.power_level > 0) {
             add_msg(m_bad, _("The EMP blast drains your power."));
             int max_drain = (u.power_level > 1000 ? 1000 : u.power_level);
-            u.charge_power(0 - rng(1 + max_drain / 3, max_drain));
+            u.charge_power(-rng(1 + max_drain / 3, max_drain));
         }
         // TODO: More effects?
         //e-handcuffs effects
@@ -6796,8 +6797,8 @@ Creature *game::critter_at(int x, int y)
 bool game::add_zombie(monster &critter)
 {
     if( !m.inbounds( critter.posx(), critter.posy(), critter.posz() ) ) {
-        dbg( D_ERROR ) << "added a critter with out-of-bounds position: " 
-                       << critter.posx() << "," << critter.posy() << ","  << critter.posz() 
+        dbg( D_ERROR ) << "added a critter with out-of-bounds position: "
+                       << critter.posx() << "," << critter.posy() << ","  << critter.posz()
                        << " - " << critter.disp_name();
     }
     return critter_tracker.add(critter);
@@ -7584,12 +7585,26 @@ void game::open_gate(const int examx, const int examy, const ter_id handle_type)
         open_message = _("The palisade gate swings open!");
         close_message = _("The palisade gate swings closed with a crash!");
         bash_dmg = 30;
+    } else if ( handle_type == t_gates_control_metal) {
+        v_wall_type = t_wall_metal_v;
+        h_wall_type = t_wall_metal_h;
+        door_type = t_door_metal_locked;
+        floor_type = t_metal_floor;
+        pull_message = _("You throw the lever...");
+        open_message = _("The door rises!");
+        close_message = _("The door slams shut!");
+        bash_dmg = 60;
     } else {
         return;
     }
 
     add_msg(pull_message);
     u.moves -= 900;
+    if (handle_type == t_gates_control_metal){
+        g->u.moves -= 300;
+    }else{
+        g->u.moves -= 900;
+    }
 
     bool open = false;
     bool close = false;
@@ -8968,7 +8983,7 @@ std::vector<map_item_stack> game::find_nearby_items(int iRadius)
     std::vector<map_item_stack> ret;
     std::vector<std::string> vOrder;
 
-    if (u.has_effect("blind")) {
+    if (u.has_effect("blind") || u.worn_with_flag("BLIND")) {
         return ret;
     }
 
@@ -10496,7 +10511,7 @@ void game::plthrow(int pos)
     int dexbonus = (int)(std::pow(std::max(u.dex_cur - 8, 0), 0.8) * 3.0);
 
     move_cost += skill_cost;
-    move_cost += 20 * u.encumb(bp_torso);
+    move_cost += 2 * u.encumb(bp_torso);
     move_cost -= dexbonus;
 
     if (u.has_trait("LIGHT_BONES")) {
@@ -10646,7 +10661,6 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
         }
     }
 
-    int reload_pos = INT_MIN;
     if (!u.weapon.is_gun()) {
         return;
     }
@@ -10684,62 +10698,14 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
     }
 
     if (u.weapon.has_flag("RELOAD_AND_SHOOT") && u.weapon.charges == 0) {
-            // find worn quivers
-            std::vector<item *> quivers;
-            for( auto &worn : u.worn ) {
-
-                if (worn.type->can_use("QUIVER") && !worn.contents.empty()
-                    && worn.contents[0].is_ammo() && worn.contents[0].charges > 0
-                    && worn.contents[0].ammo_type() == u.weapon.ammo_type() ) {
-                    quivers.push_back(&worn);
-                }
-            }
-            // ask which quiver to draw from
-            if (!quivers.empty()) {
-                int choice = -1;
-                //only one quiver found, choose it
-                if (quivers.size() == 1) {
-                    choice = 0;
-                } else {
-                    std::vector<std::string> choices;
-                    for( auto i : quivers ) {
-
-                        std::ostringstream ss;
-                        ss << string_format(_("%s from %s (%d)"),
-                                            i->contents[0].tname().c_str(),
-                                            i->type_name(1).c_str(),
-                                            i->contents[0].charges);
-                        choices.push_back(ss.str());
-                    }
-                    choice = (uimenu(false, _("Draw from which quiver?"), choices)) - 1;
-                }
-
-                // draw arrow from quiver
-                if (choice > -1) {
-                    item *worn = quivers[choice];
-                    item &arrows = worn->contents[0];
-                    // chance to fail pulling an arrow at lower levels
-                    int archery = u.skillLevel("archery");
-                    if (archery <= 2 && one_in(10)) {
-                        u.moves -= 30;
-                        u.add_msg_if_player(_("You try to pull a %s from your %s, but fail!"),
-                                            arrows.tname().c_str(), worn->type_name(1).c_str());
-                        return;
-                    }
-                    u.add_msg_if_player(_("You pull a %s from your %s and nock it."),
-                                        arrows.tname().c_str(), worn->type_name(1).c_str());
-                    reload_pos = u.get_item_position(worn);
-                }
-            }
-        if (reload_pos == INT_MIN) {
-            reload_pos = u.weapon.pick_reload_ammo(u, true);
-        }
+        const int reload_pos = u.weapon.pick_reload_ammo( u, true );
         if (reload_pos == INT_MIN) {
             add_msg(m_info, _("Out of ammo!"));
             return;
         }
-
-        u.weapon.reload(u, reload_pos);
+        if( !u.weapon.reload( u, reload_pos ) ) {
+            return;
+        }
         u.moves -= u.weapon.reload_time(u);
         refresh_all();
     }
@@ -10821,6 +10787,7 @@ void game::plfire(bool burst, int default_target_x, int default_target_y)
 
 void game::butcher()
 {
+    const static std::string salvage_string = "salvage";
     if (u.controlling_vehicle) {
         add_msg(m_info, _("You can't butcher while driving!"));
         return;
@@ -10836,23 +10803,21 @@ void game::butcher()
 
     // TODO: Properly handle different material whitelists
     // TODO: Improve quality of this section
-    std::vector<item*> dumpvec;
-    u.inv.dump( dumpvec );
+    auto salvage_filter = []( item it ) {
+        const auto usable = it.get_usable_item( salvage_string );
+        return usable != nullptr;
+    };
+
+    std::vector< item * > salvage_tools = u.items_with( salvage_filter );
     int salvage_tool_index = INT_MIN;
     item *salvage_tool = nullptr;
-    salvage_actor *salvage_iuse = nullptr;
-    for( auto &it : dumpvec ) {
-        if( it == nullptr ) {
-            continue;
-        }
-
-        const auto fun = it->type->get_use( "salvage" );
-        if( fun != nullptr ) {
-            salvage_tool_index = u.inv.position_by_item( it );
-            salvage_iuse = dynamic_cast<salvage_actor*>( fun->get_actor_ptr() );
-            salvage_tool = it;
-            break;
-        }
+    const salvage_actor *salvage_iuse = nullptr;
+    if( !salvage_tools.empty() ) {
+        salvage_tool = salvage_tools.front();
+        salvage_tool_index = u.get_item_position( salvage_tool );
+        item *usable = salvage_tool->get_usable_item( salvage_string );
+        salvage_iuse = dynamic_cast<const salvage_actor*>(
+            usable->get_use( salvage_string )->get_actor_ptr() );
     }
 
 
@@ -11766,12 +11731,14 @@ bool game::plmove(int dx, int dy)
             }
         }
 
-        const trap_id tid = m.tr_at(x, y);
-        if (tid != tr_null) {
-            const struct trap &t = *traplist[tid];
-            if ((t.can_see(u, x, y)) && !t.is_benign() &&
-                !query_yn(_("Really step onto that %s?"), t.name.c_str())) {
-                return false;
+        if (!(u.has_effect("blind") || u.worn_with_flag("BLIND"))) {
+            const trap_id tid = m.tr_at(x, y);
+            if (tid != tr_null) {
+                const struct trap &t = *traplist[tid];
+                if ((t.can_see(u, x, y)) && !t.is_benign() &&
+                    !query_yn(_("Really step onto that %s?"), t.name.c_str())) {
+                    return false;
+                }
             }
         }
 
@@ -11786,67 +11753,66 @@ bool game::plmove(int dx, int dy)
                         add_msg(m_info, _("You can't move %s while standing on it!"), grabbed_vehicle->name.c_str());
                         return false;
                     }
-		//vehicle movement: strength check
-		int mc = 0;
-		int str_req = (grabbed_vehicle->total_mass() / 25); //strengh reqired to move vehicle.
 
-		//if vehicle is rollable we modify str_req based on a function of movecost per wheel.
-    // Veh just too big to grab & move; 41-45 lets folks have a bit of a window
-    // (Roughly 1.1K kg = danger zone; cube vans are about the max)
-    if (str_req > 45) {
-        add_msg(m_info, _("The %s is too bulky for you to move by hand."),
-          grabbed_vehicle->name.c_str() );
-        u.moves -= 100;
-        return false; // No shoving around an RV.
-    }
-    
-		//if vehicle weighs too much, wheels don't provide a bonus.
-		if (grabbed_vehicle->valid_wheel_config() && str_req <= 40)	{
+                    //vehicle movement: strength check
+                    int mc = 0;
+                    int str_req = (grabbed_vehicle->total_mass() / 25); //strengh reqired to move vehicle.
 
-		    //determine movecost for terrain touching wheels
-		    std::vector<int> wheel_indices = grabbed_vehicle->all_parts_with_feature(VPFLAG_WHEEL);
-		    for(auto p : wheel_indices) {
-          mc += (str_req / wheel_indices.size()) * m.move_cost(grabbed_vehicle->global_x() +
-            grabbed_vehicle->parts[p].precalc[0].x, grabbed_vehicle->global_y() +
-            grabbed_vehicle->parts[p].precalc[0].y, grabbed_vehicle);
-		    }
-		    //set strength check threshold
-		    //if vehicle has many or only one wheel (shopping cart), it is as if it had four. 
-		    if(wheel_indices.size() > 4 || wheel_indices.size() == 1) {
-		    	str_req = mc / 4 + 1;
-		    } else {
-		    	str_req = mc / wheel_indices.size() + 1;
-		    }
-		} else {		
-		    str_req++;		    
-		    //if vehicle has no wheels str_req make a noise.
-		    if (str_req <= u.get_str() ) {
-            sounds::sound( grabbed_vehicle->global_x(), grabbed_vehicle->global_y(), str_req * 2,
-				       _("a scraping noise."));
-		    }
-		}
+                    //if vehicle is rollable we modify str_req based on a function of movecost per wheel.
 
-		//final strength check and outcomes
-		if (str_req <= u.get_str() ) {
-		    //calculate exertion factor and movement penalty
-		    drag_multiplier += str_req / u.get_str();
-		    int ex = dice(1, 3) - 1 + str_req;
-		    if (ex > u.get_str() ) {
-            add_msg(m_bad, _("You strain yourself to move the %s!"),
-              grabbed_vehicle->name.c_str() );
-            u.moves -= 200;
-            u.mod_pain(1);
-		    } else if (ex == u.get_str() ) {
-            u.moves -= 200;
-            add_msg( _("It takes some time to move the %s."),
-              grabbed_vehicle->name.c_str());
-		    }
-		} else {
-		    u.moves -= 100;
-		    add_msg( m_bad, _("You lack the strength to move the %s"),
-			     grabbed_vehicle->name.c_str() );
-		    return false;
-		}
+                    // Veh just too big to grab & move; 41-45 lets folks have a bit of a window
+                    // (Roughly 1.1K kg = danger zone; cube vans are about the max)
+                    if (str_req > 45) {
+                        add_msg(m_info, _("The %s is too bulky for you to move by hand."),
+                                grabbed_vehicle->name.c_str() );
+                        u.moves -= 100;
+                        return false; // No shoving around an RV.
+                    }
+
+                    //if vehicle weighs too much, wheels don't provide a bonus.
+                    if (grabbed_vehicle->valid_wheel_config() && str_req <= 40) {
+                        //determine movecost for terrain touching wheels
+                        std::vector<int> wheel_indices = grabbed_vehicle->all_parts_with_feature(VPFLAG_WHEEL);
+                        for(auto p : wheel_indices) {
+                            mc += (str_req / wheel_indices.size()) *
+                                m.move_cost(grabbed_vehicle->global_x() + grabbed_vehicle->parts[p].precalc[0].x,
+                                        grabbed_vehicle->global_y() + grabbed_vehicle->parts[p].precalc[0].y,
+                                        grabbed_vehicle);
+                        }
+                        //set strength check threshold
+                        //if vehicle has many or only one wheel (shopping cart), it is as if it had four.
+                        if(wheel_indices.size() > 4 || wheel_indices.size() == 1) {
+                            str_req = mc / 4 + 1;
+                        } else {
+                            str_req = mc / wheel_indices.size() + 1;
+                        }
+                    } else {
+                        str_req++;
+                        //if vehicle has no wheels str_req make a noise.
+                        if (str_req <= u.get_str() ) {
+                            sounds::sound( grabbed_vehicle->global_x(), grabbed_vehicle->global_y(), str_req * 2,
+                                _("a scraping noise."));
+                        }
+                    }
+
+                    //final strength check and outcomes
+                    if (str_req <= u.get_str() ) {
+                        //calculate exertion factor and movement penalty
+                        drag_multiplier += str_req / u.get_str();
+                        int ex = dice(1, 3) - 1 + str_req;
+                        if (ex > u.get_str() ) {
+                            add_msg(m_bad, _("You strain yourself to move the %s!"), grabbed_vehicle->name.c_str() );
+                            u.moves -= 200;
+                            u.mod_pain(1);
+                        } else if (ex == u.get_str() ) {
+                            u.moves -= 200;
+                            add_msg( _("It takes some time to move the %s."), grabbed_vehicle->name.c_str());
+                        }
+                    } else {
+                        u.moves -= 100;
+                        add_msg( m_bad, _("You lack the strength to move the %s"), grabbed_vehicle->name.c_str() );
+                        return false;
+                    }
 
                     tileray mdir;
 
@@ -12078,7 +12044,7 @@ bool game::plmove(int dx, int dy)
         // Calculate cost of moving
         bool diag = trigdist && u.posx() != x && u.posy() != y;
         u.moves -= int(u.run_cost(m.combined_movecost(u.posx(), u.posy(), x, y, grabbed_vehicle,
-                                  		     movecost_modifier), diag) * drag_multiplier);
+                                               movecost_modifier), diag) * drag_multiplier);
 
         // Adjust recoil down
         u.recoil -= int(u.str_cur / 2) + u.skillLevel("gun");
@@ -12231,7 +12197,7 @@ bool game::plmove(int dx, int dy)
 
         // List items here
         if (!m.has_flag("SEALED", x, y)) {
-            if (u.has_effect("blind") && !m.i_at(x, y).empty()) {
+            if ((u.has_effect("blind") || u.worn_with_flag("BLIND")) && !m.i_at(x, y).empty()) {
                 add_msg(_("There's something here, but you can't see what it is."));
             } else if (!m.i_at(x, y).empty()) {
                 std::vector<std::string> names;
@@ -12340,7 +12306,7 @@ bool game::plmove(int dx, int dy)
             if (u.in_vehicle) {
                 m.unboard_vehicle(u.posx(), u.posy());
             }
-            u.power_level -= (tunneldist * 250); //tunneling costs 10 bionic power per impassable tile
+            u.charge_power(-(tunneldist * 250)); //tunneling costs 250 bionic power per impassable tile
             u.moves -= 100; //tunneling costs 100 moves
             //move us the number of tiles we tunneled in the x direction, plus 1 for the last tile.
             u.setx( u.posx() + (tunneldist + 1) * (x - u.posx()) );
@@ -12351,7 +12317,7 @@ bool game::plmove(int dx, int dy)
                 m.board_vehicle(u.posx(), u.posy(), &u);
             }
         } else { //or you couldn't tunnel due to lack of energy
-            u.power_level -= 250; //failure is expensive!
+            u.charge_power(-250); //failure is expensive!
             return false;
         }
 
@@ -12365,7 +12331,7 @@ bool game::plmove(int dx, int dy)
         }
         u.moves -= 100;
     } else { // Invalid move
-        if (u.has_effect("blind") || u.has_effect("stunned")) {
+        if (u.has_effect("blind") || u.worn_with_flag("BLIND") || u.has_effect("stunned")) {
             // Only lose movement if we're blind
             add_msg(_("You bump into a %s!"), m.name(x, y).c_str());
             u.moves -= 100;
@@ -12814,7 +12780,7 @@ void game::vertical_move(int movez, bool force)
         m.vertical_shift( levz );
 #endif
         return;
-    } 
+    }
 
     if( !force ) {
         monstairz = levz;
