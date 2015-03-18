@@ -1,0 +1,20 @@
+[
+  {
+      "type" : "furniture",
+      "id" : "f_headstone",
+      "name": "headstone",
+      "symbol": "n",
+      "color": "light_gray",
+      "move_cost_mod": 2,
+      "required_str": 9,
+      "flags": ["TRANSPARENT", "THIN_OBSTACLE", "PLACE_ITEM"],
+      "bash": {
+          "str_min": 16, "str_max": 40,
+          "sound": "smash!",
+          "sound_fail": "thump.",
+          "items": [
+              { "item": "rock", "amount": 4, "minamount": 1 }
+          ]
+      }
+  }
+]

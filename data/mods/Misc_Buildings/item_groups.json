@@ -1,0 +1,43 @@
+[
+  {
+    "type" : "item_group",
+    "id" : "grave_tribute",
+    "items":[
+      ["hairpin", 10],
+      ["fc_hairpin", 5],
+      ["umbrella", 2],
+      ["child_book", 10],
+      ["tall_tales", 10],
+      ["story_book", 10],
+      ["novel_pulp", 10],
+      ["fairy_tales", 10],
+      ["mag_comic", 2],
+
+      ["bluebell_flower", 30],
+      ["dahlia_flower", 30],
+      ["poppy_flower", 30],
+
+      ["cigar", 5],
+      ["whiskey", 5],
+      ["vodka", 5],
+      ["gin", 5],
+      ["rum", 5],
+      ["tequila", 5],
+      ["triple_sec", 5],
+      ["brandy", 5],
+      ["wine_riesling", 5],
+      ["wine_chardonnay", 5],
+      ["wine_cabernet", 5],
+      ["wine_noir", 5],
+      ["beer", 5],
+      ["european_pilsner", 5],
+      ["pale_ale", 5],
+      ["india_pale_ale", 5],
+      ["stout", 5],
+      ["belgian_ale", 5],
+      ["imperial_stout", 5],
+
+      ["survnote", 1]
+    ]
+  }
+]
