@@ -274,7 +274,7 @@
       "set": [
         { "point": "terrain", "id": "t_dirt", "x": [2, 21], "y": [2, 21], "repeat": [ 5, 10 ] },
         { "point": "terrain", "id": "t_tree", "x": [2, 21], "y": [2, 21], "repeat": [ 5, 10 ] },
-        { "point": "furniture", "id": "f_headstone", "x": [2, 21], "y": [2, 21], "repeat": [ 5, 10 ] }
+        { "point": "furniture", "id": "f_headstone", "x": [2, 21], "y": [2, 21], "repeat": [ 5, 20 ] }
       ],
       "place_items": [
       ],
